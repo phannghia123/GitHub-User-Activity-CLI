@@ -49,3 +49,9 @@ Notes
 - If you need help creating the remote repo or running the commands, tell me and I can run the safe local commands for you (init/add/commit) or walk through `gh` steps.
 
 That's it — tell me whether to initialize git locally now, or if you want me to push (you'll need to provide credentials or use `gh`).
+
+Roadmap
+
+You can find a related task-tracker roadmap here:
+
+https://roadmap.sh/projects/task-tracker

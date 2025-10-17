@@ -3,6 +3,34 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Virtualenv / environment
+venv/
+ENV/
+.env
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Local data
+events.json
+tasks.json
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
 # Distribution / packaging
 .Python
 env/

@@ -28,6 +28,7 @@ def generate_id(tasks):
 # Task Management Functions
 # ==========================
 
+ts = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
 def add_task(description):
     tasks = load_tasks()
@@ -35,8 +36,8 @@ def add_task(description):
         'id': generate_id(tasks),
         'description': description,
         'status': "todo",
-        'created_at': datetime.now().isoformat(),
-        'updated_at': datetime.now().isoformat()
+        'created_at': ts,
+        'updated_at': ts
     }
     tasks.append(task)
     save_tasks(tasks)
@@ -85,53 +86,83 @@ def list_tasks(status=None):
     for task in tasks:
         print(f"{task['id']}: {task['description']} [{task['status']}] (Created: {task['created_at']}, Updated: {task['updated_at']})")
 
+'''
+Argument Parser
+|
+|__subparsers
+   |__add_parser('add')
+        |__add_argument('descriptions')
 
+   |__add_parser('update')
+        |__add_argument('id')
+        |__add_argument('descriptions')
+        |__add_argument('status')
+
+   |__add_parser('delete')
+        |__add_argument('id')
+
+   |__add_parser('list')
+        |__add_argument('status')
+
+   |__add_parser('mark-in-progress')
+        |__add_argument('id')
+
+   |__add_parser('mark-done')
+        |__add_argument('id')
+
+'''
 def main():
     parser = argparse.ArgumentParser(description="Simple task tracker")
     subparsers = parser.add_subparsers(dest='command')
 
     # add
     add_parser = subparsers.add_parser('add', help='Add a new task')
+        #descriptions: list of words -> nargs = number arguments
+        # '*': 0 - many
+        # '+': 1 - many
+        # '?': 0 - 1
+        # 1: 1
     add_parser.add_argument('description', nargs='+', help='Task description')
 
-    # update: allow either a new description (positional) and/or --status
-    update_parser = subparsers.add_parser('update', help='Update a task')
-    update_parser.add_argument('id', type=int, help='Task id')
-    update_parser.add_argument('description', nargs='*', help='New description (multi-word allowed)')
-    update_parser.add_argument('--status', choices=['todo', 'in-progress', 'done'], help='New status')
+    # Update Task
+    parser_update = subparsers.add_parser('update', help= 'Update on existing task')
+    parser_update.add_argument('id', type=int, help='ID of the task to update')
+    parser_update.add_argument('--descriptions', nargs='*', help='New description of the task')
+    parser_update.add_argument('--status',type=str, choices=['todo', 'in-progress', 'done'], help='New status for the task')
 
-    # delete
-    delete_parser = subparsers.add_parser('delete', help='Delete a task')
-    delete_parser.add_argument('id', type=int, help='Task id')
+    # Delete Task
+    parser_delete = subparsers.add_parser('delete', help = 'Delete a task')
+    parser_delete.add_argument('id', type=int, help='ID of the task to delete')
 
-    # list (optional status filter)
-    list_parser = subparsers.add_parser('list', help='List tasks')
-    list_parser.add_argument('status', nargs='?', choices=['todo', 'in-progress', 'done'], help='Filter by status')
+    # List Tasks
+    parser_list = subparsers.add_parser('list', help='List all tasks')
+    parser_list.add_argument('--status', type=str, choices=['todo', 'in-progress', 'done'], help='Filter tasks by status')
 
-    # mark-in-progress / mark-done convenience commands
-    mip_parser = subparsers.add_parser('mark-in-progress', help='Mark a task as in-progress')
-    mip_parser.add_argument('id', type=int, help='Task id')
+    # Mark In-Progress
+    parser_mark_in_progress = subparsers.add_parser('mark-in-progress', help='Mark a task as in-progress')
+    parser_mark_in_progress.add_argument('id', type=int, help='ID of the task to mark as in-progress')
 
-    md_parser = subparsers.add_parser('mark-done', help='Mark a task as done')
-    md_parser.add_argument('id', type=int, help='Task id')
+    # Mark Done
+    parser_mark_done = subparsers.add_parser('mark-done', help='Mark a task as done')
+    parser_mark_done.add_argument('id', type=int, help='ID of the task to mark as done')    
 
     args = parser.parse_args()
 
-    if args.command == 'add':
+    if(args.command == 'add'):
+        #Join list of words to a single string
         description = ' '.join(args.description)
         add_task(description)
-    elif args.command == 'update':
-        description = None
-        if args.description:
-            description = ' '.join(args.description)
+    elif(args.command == 'update'):
+        description = ' '.join(args.description) if args.description else None
         update_task(args.id, description=description, status=args.status)
-    elif args.command == 'delete':
+    elif(args.command == 'delete'):
         delete_task(args.id)
-    elif args.command == 'list':
-        list_tasks(status=args.status if hasattr(args, 'status') else args.status)
-    elif args.command == 'mark-in-progress':
+    elif(args.command == 'list'):
+        #Check if args.status exists
+        list_tasks(status=args.status if hasattr(args, 'status') else None)
+    elif(args.command == 'mark-in-progress'):
         update_task(args.id, status='in-progress')
-    elif args.command == 'mark-done':
+    elif(args.command == 'mark-done'):
         update_task(args.id, status='done')
     else:
         parser.print_help()
